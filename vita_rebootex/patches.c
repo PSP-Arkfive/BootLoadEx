@@ -1,14 +1,19 @@
+#include <string.h>
+
+#include <cfwmacros.h>
+
 #include "rebootex.h"
+#include "pspbtcnf.h"
 
 extern int redirect_flash;
 
-int (*pspemuLfatOpen)(char** filename, u32 a1, u32 a2, u32 a3, u32 t0) = NULL;
+int (*pspemuLfatOpen)(BootFile* filename, u32 a1, u32 a2, u32 a3, u32 t0) = NULL;
 int (*SetMemoryPartitionTable)(void *sysmem_config, SceSysmemPartTable *table) = NULL;
 
 // Load Core module_start Hook
 int loadcoreModuleStartVita(unsigned int args, void* argp, int (* start)(SceSize, void *))
 {
-    loadCoreModuleStartCommon(start);
+    loadCoreModuleStartCommon((u32)start);
     flushCache();
     return start(args, argp);
 }
@@ -35,7 +40,7 @@ int _pspemuLfatOpen(BootFile* file, u32 a1, u32 a2, u32 a3, u32 t0)
         reboot_conf->rtm_mod.size = 0;
         return 0;
     }
-    int res = pspemuLfatOpen(file, a1, a2, a3, t0);
+    pspemuLfatOpen(file, a1, a2, a3, t0);
     return 0;
 }
 
@@ -67,7 +72,7 @@ int PatchSysMem(void *a0, void *sysmem_config)
     for (u32 addr = text_addr; addr<top_addr && patches; addr += 4) {
         u32 data = _lw(addr);
         if (data == 0x247300FF){
-            SetMemoryPartitionTable = K_EXTRACT_CALL(addr-20);
+            SetMemoryPartitionTable = (void*)K_EXTRACT_CALL(addr-20);
             _sw(JAL(SetMemoryPartitionTablePatched), addr-20);
             patches--;
         }
