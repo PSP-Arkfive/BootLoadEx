@@ -15,6 +15,12 @@
  * along with PRO CFW. If not, see <http://www.gnu.org/licenses/ .
  */
 
+#include <string.h>
+
+#include <cfwmacros.h>
+#include <systemctrl.h>
+#include <systemctrl_se.h>
+
 #include "rebootex.h"
 
 #ifdef REBOOTEX
@@ -78,18 +84,18 @@ void* rtm_buf = NULL;
 int rtm_size = 0;
 
 //io functions
-int (* sceBootLfatOpen)(char * filename) = NULL;
+int (* sceBootLfatOpen)(const char * filename) = NULL;
 int (* sceBootLfatRead)(char * buffer, int length) = NULL;
 int (* sceBootLfatClose)(void) = NULL;
 
 // implementation specific patches
-extern patchRebootBuffer();
+extern void patchRebootBuffer();
 
 // Custom PRX Support
 int ARKPRXDecrypt(PSP_Header* prx, unsigned int size, unsigned int * newsize)
 {
     // Custom Packed PRX File
-    if ( (_lb((u8*)prx + 0x150) == 0x1F && _lb((u8*)prx + 0x151) == 0x8B) // GZIP
+    if ( (_lb((u32)prx + 0x150) == 0x1F && _lb((u32)prx + 0x151) == 0x8B) // GZIP
             || prx->oe_tag == 0xC01DB15D // PRO-type PRX
             || prx->oe_tag == 0xC6BA41D3 // ME-type PRX
     ){
@@ -240,19 +246,19 @@ u32 findRebootFunctions(u32 reboot_start){
             UnpackBootConfigArg = addr+8;
             u32 a = addr;
             do { a+=4; } while (_lw(a) != 0x24060001);
-            UnpackBootConfig = K_EXTRACT_CALL(a-4);
+            UnpackBootConfig = (void*)K_EXTRACT_CALL(a-4);
             UnpackBootConfigCall = a-4;
         }
 #else
         else if (data == 0x8FA40004){ // UnpackBootConfig
             if (_lw(addr+8) == 0x8FA50008) {
                 UnpackBootConfigArg = addr;
-                UnpackBootConfig = K_EXTRACT_CALL(addr+4);
+                UnpackBootConfig = (void*)K_EXTRACT_CALL(addr+4);
                 UnpackBootConfigCall = addr+4;
             }
             else if (_lw(addr+4) == 0x8FA50008) {
                 UnpackBootConfigArg = addr;
-                UnpackBootConfig = K_EXTRACT_CALL(addr+8);
+                UnpackBootConfig = (void*)K_EXTRACT_CALL(addr+8);
                 UnpackBootConfigCall = addr+8;
             }
         }

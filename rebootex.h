@@ -105,6 +105,9 @@ extern int (* UnpackBootConfig)(char * buffer, int length);
 extern u32 UnpackBootConfigCall;
 extern u32 UnpackBootConfigArg;
 
+// Scanner functions
+u32 FindImportRange(char *libname, u32 nid, u32 lower, u32 higher);
+
 // Rebootex functions
 u32 loadCoreModuleStartCommon(u32 entry);
 void patchRebootBufferPSP();
@@ -115,5 +118,7 @@ void patchRebootBufferVita();
 // IO functions
 int pspemuLfatOpenExtra(BootFile* file);
 void patchRebootIoPSP();
+
+void flushCache();
 
 #endif

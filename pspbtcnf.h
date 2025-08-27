@@ -38,7 +38,7 @@ typedef struct _btcnf_header
     unsigned int modnamestart; // 0x30
     unsigned int modnameend; // 0x34
     unsigned int unknown4[2]; // 0x38
-} _btcnf_header __attribute((packed));
+} _btcnf_header;
 
 typedef struct _btcnf_module
 {
@@ -47,7 +47,7 @@ typedef struct _btcnf_module
     unsigned int flags; //0x08
     unsigned int unk_C; //0x0C
     unsigned char hash[0x10]; //0x10
-} _btcnf_module __attribute((packed));
+} _btcnf_module;
 
 enum {
     VSH_RUNLEVEL     =     0x01,
@@ -58,5 +58,13 @@ enum {
     UMDEMU_RUNLEVEL  =     0x40,
     MLNAPP_RUNLEVEL  =     0x80,
 };
+
+int SearchPrx(char *buffer, const char *modname);
+int AddPRXNoCopyName(char * buffer, const char * insertbefore, int prxname_offset, u32 flags);
+int AddPRX(char * buffer, const char * insertbefore, const char * prxname, u32 flags);
+int RemovePrx(char *buffer, const char *prxname, u32 flags);
+int MovePrx(char * buffer, const char * insertbefore, const char * prxname, u32 flags);
+int ModifyPrxFlag(char *buffer, const char* modname, u32 flags);
+int GetPrxFlag(char *buffer, const char* modname, u32 *flags);
 
 #endif

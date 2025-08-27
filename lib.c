@@ -35,22 +35,22 @@ int strncmp(const char *a, const char *b, unsigned int count)
 }
 
 
-void* memset(void *dst, u8 code, int size)
+void* memset(void *dst, int code, unsigned int size)
 {
     u8 *p1 = (u8 *)dst;
     while(size--)
     {
-        *p1++ = code;
+        *p1++ = (u8)code;
     }
     return p1;
 }
 
-int strcpy(char* dest, char* orig){
+char* strcpy(char* dest, const char* orig){
     int i = 0;
     do{
         dest[i] = orig[i];
     } while (orig[i++]);
-    return i-1;
+    return (char*)i-1; // TODO: this is NOT standard behavior of strcpy
 }
 
 void *memmove(void * to_, const void * from_, unsigned int length)
@@ -73,7 +73,7 @@ void *memmove(void * to_, const void * from_, unsigned int length)
         return to_;
     }
 
-    return memcpy(to, from, length);
+    return memcpy(to, (void*)from, length);
 }
 
 #ifdef MS_IPL

@@ -1,4 +1,5 @@
-#include "rebootconfig.h"
+#include <string.h>
+
 #include "rebootex.h"
 #include "pspbtcnf.h"
 
@@ -42,7 +43,7 @@ int SearchPrx(char *buffer, const char *modname)
     return modnum;
 }
 
-int AddPRXNoCopyName(char * buffer, char * insertbefore, int prxname_offset, u32 flags)
+int AddPRXNoCopyName(char * buffer, const char * insertbefore, int prxname_offset, u32 flags)
 {
     int modnum;
 
@@ -68,7 +69,7 @@ int AddPRXNoCopyName(char * buffer, char * insertbefore, int prxname_offset, u32
         newmod.flags = 0x80010000 | (flags & 0x0000FFFF);
     }
 
-    memmove(&module[modnum + 1], &module[modnum + 0], buffer + header->modnameend - (unsigned int)&module[modnum + 0]);
+    memmove(&module[modnum + 1], &module[modnum + 0], (u32)buffer + header->modnameend - (unsigned int)&module[modnum + 0]);
     memcpy(&module[modnum + 0], &newmod, sizeof(newmod));
     header->nmodules++;
     header->modnamestart += sizeof(newmod);
@@ -84,7 +85,7 @@ int AddPRXNoCopyName(char * buffer, char * insertbefore, int prxname_offset, u32
     return header->modnameend;
 }
 
-int AddPRX(char * buffer, char * insertbefore, char * prxname, u32 flags)
+int AddPRX(char * buffer, const char * insertbefore, const char * prxname, u32 flags)
 {
     int modnum;
     
@@ -104,12 +105,12 @@ int AddPRX(char * buffer, char * insertbefore, char * prxname, u32 flags)
     }
 
     _btcnf_header * header = (_btcnf_header *)buffer;
-    int len = strcpy(buffer + header->modnameend, prxname); //strlen(prxname);
-    header->modnameend += len+1;
-    return AddPRXNoCopyName(buffer, insertbefore, header->modnameend - len - 1, flags);
+    char* len = strcpy(buffer + header->modnameend, prxname); // TODO: is this correct? or maybe strlen(prxname);
+    header->modnameend += (u32)len+1;
+    return AddPRXNoCopyName(buffer, insertbefore, header->modnameend - (u32)len - 1, flags);
 }
 
-void RemovePrx(char *buffer, const char *prxname, u32 flags)
+int RemovePrx(char *buffer, const char *prxname, u32 flags)
 {
     u32 old_flags;
     int ret;
@@ -127,10 +128,10 @@ void RemovePrx(char *buffer, const char *prxname, u32 flags)
         old_flags = old_flags & (~flags);
     }
 
-    ModifyPrxFlag(buffer, prxname, 0x80010000 | (old_flags & 0x0000FFFF));
+    return ModifyPrxFlag(buffer, prxname, 0x80010000 | (old_flags & 0x0000FFFF));
 }
 
-int MovePrx(char * buffer, char * insertbefore, const char * prxname, u32 flags)
+int MovePrx(char * buffer, const char * insertbefore, const char * prxname, u32 flags)
 {
     RemovePrx(buffer, prxname, flags);
 
@@ -138,7 +139,7 @@ int MovePrx(char * buffer, char * insertbefore, const char * prxname, u32 flags)
 }
 
 // Note flags is 32-bits!
-void ModifyPrxFlag(char *buffer, const char* modname, u32 flags)
+int ModifyPrxFlag(char *buffer, const char* modname, u32 flags)
 {
     int modnum;
 
@@ -154,6 +155,7 @@ void ModifyPrxFlag(char *buffer, const char* modname, u32 flags)
     _btcnf_module * module = (_btcnf_module *)(buffer + header->modulestart);
 
     module[modnum].flags = flags;
+    return 0;
 }
 
 // Note flags is 32-bits!
