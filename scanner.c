@@ -4,7 +4,7 @@
 #include <psploadcore.h>
 
 #include <cfwmacros.h>
-#include <module2.h>
+
 #include <rebootconfig.h>
 #include <systemctrl_se.h>
 
