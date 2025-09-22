@@ -1,6 +1,6 @@
 PSPSDK=$(shell psp-config --pspsdk-path)
 INCDIR = $(PSPSDK)/include $(ARKROOT)/common/include $(ARKROOT)/kxploit/ $(ARKROOT)/libs/iplsdk
-REBOOTEXDIR = $(ARKROOT)/loader/rebootex
+BOOTLOADEX = $(ARKROOT)/loader/rebootex
 TARGET = ms_payloadex.bin
 
 PYTHON=$(shell which python3)
@@ -13,7 +13,7 @@ CC = psp-gcc
 LD = psp-ld
 STRIP = psp-strip
 OBJCOPY = psp-objcopy
-LINKFILE = $(REBOOTEXDIR)/linkfile.l
+LINKFILE = $(BOOTLOADEX)/linkfile.l
 
 REBOOT_OBJS = \
 	main.o \
@@ -30,14 +30,14 @@ CFLAGS += -DDEBUG=$(DEBUG)
 LIBS += -lcolordebugger
 endif
 
-crt0.o : $(REBOOTEXDIR)/crt0.S
+crt0.o : $(BOOTLOADEX)/crt0.S
 	$(CC) -I$(PSPSDK)/include -c $< -o crt0.o
 
-$(REBOOT_OBJS) : %.o : $(REBOOTEXDIR)/%.c
+$(REBOOT_OBJS) : %.o : $(BOOTLOADEX)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 patches.o: $(ARKROOT)/core/compat/psp/rebootex/patches.c
-	$(CC) $(CFLAGS) -I$(REBOOTEXDIR) -c $< -o $@
+	$(CC) $(CFLAGS) -I$(BOOTLOADEX) -c $< -o $@
 
 main.elf: crt0.o $(REBOOT_OBJS) $(C_OBJS) patches.o
 
