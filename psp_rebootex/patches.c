@@ -31,6 +31,7 @@ void setRebootModule();
 
 #ifdef PAYLOADEX
 #ifndef MS_IPL
+#if EXTRA_CFW_SUPPORT
 enum {
     CFW_ARK,
     CFW_PRO,
@@ -39,6 +40,7 @@ enum {
 
 static int cfw_type = CFW_ARK;
 static int psp_model = PSP_1000;
+#endif
 #endif
 #endif
 
@@ -75,6 +77,7 @@ int loadcoreModuleStartPSP(void * arg1, void * arg2, void * arg3, int (* start)(
 
 #ifdef PAYLOADEX
 #ifndef MS_IPL
+#if EXTRA_CFW_SUPPORT
 void xor_cipher(u8* data, u32 size, u8* key, u32 key_size)
 {
     u32 i;
@@ -96,6 +99,7 @@ int MECheckExec(unsigned char * addr, void * arg2){
     unPatchLoadCoreCheckExec();
     return 0;
 }
+#endif
 #endif
 #endif
 
@@ -336,6 +340,7 @@ int patch_bootconf_fatms371(char *buffer, int length)
 
 #ifdef PAYLOADEX
 #ifndef MS_IPL
+#if EXTRA_CFW_SUPPORT
 int patch_bootconf_pro(char *buffer, int length)
 {
     struct {
@@ -429,6 +434,7 @@ int patch_bootconf_me_recovery(char *buffer, int length)
 }
 #endif
 #endif
+#endif
 
 int UnpackBootConfigPatched(char **p_buffer, int length)
 {
@@ -443,6 +449,7 @@ int UnpackBootConfigPatched(char **p_buffer, int length)
 
     #ifdef PAYLOADEX
     #ifndef MS_IPL
+    #if EXTRA_CFW_SUPPORT
     if (cfw_type == CFW_PRO){
         newsize = patch_bootconf_pro(buffer, result);
         if (newsize > 0) result = newsize;
@@ -457,6 +464,7 @@ int UnpackBootConfigPatched(char **p_buffer, int length)
         }
         return result;
     }
+    #endif
     #endif
     #endif
 
@@ -606,7 +614,9 @@ int _sceBootLfatOpen(char * filename)
 
     // patch to allow custom boot
     if (strncmp(filename+4, "pspbtcnf", 8) == 0){
-        int res = sceBootLfatOpen("/arkcipl.cfg");
+        int res = -1;
+        #if EXTRA_CFW_SUPPORT
+        res = sceBootLfatOpen("/arkcipl.cfg");
         if (res == 0){
             char cfg[64]; memset(cfg, 0, sizeof(cfg));
             sceBootLfatRead(cfg, sizeof(cfg));
@@ -619,25 +629,30 @@ int _sceBootLfatOpen(char * filename)
                 else if (strcmp(cfg, "cfw=me") == 0) {
                     cfw_type = CFW_ME;
                     filename[9] = 'j'; // pspbtjnf
-                    extraPRXDecrypt = &MEPRXDecrypt;
-                    extraCheckExec = &MECheckExec;
+                    extraPRXDecrypt = (void*)&MEPRXDecrypt;
+                    extraCheckExec = (void*)&MECheckExec;
                 }
             }
             #endif
         }
         else {
+        #endif
             // check for custom btcnf
             filename[6] = 't'; // pstbtcnf.bin
             res = sceBootLfatOpen(filename);
             if (res >= 0) return res;
             filename[6] = 'p'; // fallback
+        #if EXTRA_CFW_SUPPORT
         }
+        #endif
 
         #ifdef PAYLOADEX
         #ifndef MS_IPL
+        #if EXTRA_CFW_SUPPORT
         if (filename[12] == '_'){
             psp_model = (10*(filename[13]-'0') + (filename[14]-'0')) - 1;
         }
+        #endif
         #endif
         #endif
     }

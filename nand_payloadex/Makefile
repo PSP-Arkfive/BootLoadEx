@@ -1,6 +1,6 @@
 PSPSDK=$(shell psp-config --pspsdk-path)
-INCDIR = $(PSPSDK)/include $(ARKROOT)/common/include $(ARKROOT)/kxploit/
-BOOTLOADEX = $(ARKROOT)/loader/rebootex
+INCDIR = $(PSPSDK)/include $(ARKSDK)/include
+BOOTLOADEX ?= ..
 TARGET = nand_payloadex.bin
 
 PYTHON=$(shell which python3)
@@ -21,9 +21,9 @@ REBOOT_OBJS = \
 	pspbtcnf.o \
 	
 C_OBJS = \
-	$(ARKROOT)/libs/libsploit/scanner.o \
+	$(BOOTLOADEX)/scanner.o \
 
-LIBS = -L $(ARKROOT)/libs
+LIBS = -L $(ARKSDK)/libs
 
 ifdef DEBUG
 CFLAGS += -DDEBUG=$(DEBUG)
@@ -36,7 +36,7 @@ crt0.o : $(BOOTLOADEX)/crt0.S
 $(REBOOT_OBJS) : %.o : $(BOOTLOADEX)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-patches.o: $(ARKROOT)/core/compat/psp/rebootex/patches.c
+patches.o: $(BOOTLOADEX)/psp_rebootex/patches.c
 	$(CC) $(CFLAGS) -I$(BOOTLOADEX) -c $< -o $@
 
 main.elf: crt0.o $(REBOOT_OBJS) $(C_OBJS) patches.o
@@ -50,5 +50,4 @@ $(TARGET): main.elf
 clean:
 	$(Q)rm -rf *~ *.s *.o *.elf nand_payloadex.bin nand_payloadex.h ms_payloadex.h $(EXTRA_CLEAN)
 
-include $(ARKROOT)/common/make/global.mak
-include $(ARKROOT)/common/make/beauty_bin.mak
+include $(ARKSDK)/build-tools/beauty_bin.mak
