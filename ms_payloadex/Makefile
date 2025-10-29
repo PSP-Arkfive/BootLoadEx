@@ -1,12 +1,14 @@
-PSPSDK=$(shell psp-config --pspsdk-path)
-INCDIR = $(PSPSDK)/include $(ARKSDK)/include $(ARKSDK)/include/iplsdk
+PSPSDK = $(shell psp-config --pspsdk-path)
+PSPDEV = $(shell psp-config --pspdev-path)
+PYTHON = $(shell which python3)
+ARKSDK = $(PSPDEV)/share/ark-dev-sdk
 BOOTLOADEX ?= ..
-TARGET = ms_payloadex.bin
 
-PYTHON=$(shell which python3)
+TARGET = ms_payloadex.bin
 
 all: $(TARGET)
 
+INCDIR = $(PSPSDK)/include $(PSPSDK)/include/iplsdk
 CFLAGS = -std=c99 -Wall -Os -G0 -fno-pic $(addprefix -I, $(INCDIR)) -DPAYLOADEX -DMS_IPL
 
 CC = psp-gcc

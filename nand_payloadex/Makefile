@@ -1,12 +1,14 @@
-PSPSDK=$(shell psp-config --pspsdk-path)
-INCDIR = $(PSPSDK)/include $(ARKSDK)/include
+PSPSDK = $(shell psp-config --pspsdk-path)
+PSPDEV = $(shell psp-config --pspdev-path)
+PYTHON = $(shell which python3)
+ARKSDK = $(PSPDEV)/share/ark-dev-sdk
 BOOTLOADEX ?= ..
-TARGET = nand_payloadex.bin
 
-PYTHON=$(shell which python3)
+TARGET = nand_payloadex.bin
 
 all: $(TARGET)
 
+INCDIR = $(PSPSDK)/include $(PSPSDK)/include/iplsdk
 CFLAGS = -std=c99 -Wall -Os -G0 -fno-pic $(addprefix -I, $(INCDIR)) -DPAYLOADEX
 
 CC = psp-gcc
@@ -23,7 +25,7 @@ REBOOT_OBJS = \
 C_OBJS = \
 	$(BOOTLOADEX)/scanner.o \
 
-LIBS = -L $(ARKSDK)/libs
+LIBS = -L $(PSPSDK)/lib
 
 ifdef DEBUG
 CFLAGS += -DDEBUG=$(DEBUG)
