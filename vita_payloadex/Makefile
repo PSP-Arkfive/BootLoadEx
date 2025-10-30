@@ -21,6 +21,8 @@ REBOOT_OBJS = \
 	main.o \
 	lib.o \
 	pspbtcnf.o \
+	patches_vita.o \
+	patches_vita_vpsp.o
 	
 C_OBJS = \
 	$(BOOTLOADEX)/scanner.o \
@@ -38,10 +40,7 @@ crt0.o : $(BOOTLOADEX)/crt0.S
 $(REBOOT_OBJS) : %.o : $(BOOTLOADEX)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-patches.o: $(BOOTLOADEX)/vita_rebootex/patches.c
-	$(CC) $(CFLAGS) -I$(BOOTLOADEX) -c $< -o $@
-
-main.elf: crt0.o $(REBOOT_OBJS) $(C_OBJS) patches.o
+main.elf: crt0.o $(REBOOT_OBJS) $(C_OBJS)
 
 $(TARGET): main.elf
 	$(Q)$(STRIP) -s $<
