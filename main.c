@@ -326,11 +326,13 @@ int _arkReboot(int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int a
     memcpy(ark_config, &_arkconf, sizeof(ARKConfig));
     #endif
 
+    // check config
+    checkRebootConfig();
+
     // scan for reboot functions
     findRebootFunctions();
     
     // patch reboot buffer
-    checkRebootConfig();
     patchRebootBuffer();
     
     // Forward Call
