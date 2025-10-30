@@ -2,15 +2,6 @@ cmake_minimum_required(VERSION 3.28)
 
 project(bootloadex VERSION 1.0 LANGUAGES C ASM)
 
-include(FetchContent)
-FetchContent_Declare(
-    ark-dev-sdk
-    GIT_REPOSITORY https://github.com/PSP-Arkfive/ark-dev-sdk.git
-    GIT_TAG main
-    EXCLUDE_FROM_ALL
-)
-FetchContent_MakeAvailable(ark-dev-sdk)
-
 add_library(bootloadex_common INTERFACE)
 target_sources(bootloadex_common INTERFACE crt0.S main.c lib.c pspbtcnf.c scanner.c rebootex.h)
 target_include_directories(bootloadex_common INTERFACE ${CMAKE_CURRENT_LIST_DIR} ${ark-dev-sdk_SOURCE_DIR}/include)
