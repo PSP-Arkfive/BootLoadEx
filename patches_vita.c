@@ -119,7 +119,7 @@ void patchRebootBuffer(){
     _sw(0x27A40004, UnpackBootConfigArg); // addiu $a0, $sp, 4
     _sw(JAL(UnpackBootConfigVita), UnpackBootConfigCall); // Hook UnpackBootConfig
 
-    for (u32 addr = reboot_start; addr<reboot_end; addr+=4){
+    for (u32 addr = REBOOT_TEXT; addr<reboot_end; addr+=4){
         u32 data = _lw(addr);
         if (data == 0xAFBF0000 && _lw(addr + 8) == 0x00000000) {
         	pspemuLfatOpen = (void *)K_EXTRACT_CALL(addr + 4);

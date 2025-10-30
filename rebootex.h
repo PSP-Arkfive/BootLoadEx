@@ -81,7 +81,6 @@ typedef struct
 extern RebootConfigARK* reboot_conf;
 extern ARKConfig* ark_config;
 
-extern u32 reboot_start;
 extern u32 reboot_end;
 
 // sceReboot Main Function

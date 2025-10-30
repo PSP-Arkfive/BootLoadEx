@@ -121,7 +121,7 @@ void patchRebootBuffer(){
 #endif
 #endif
     
-    for (u32 addr = reboot_start; addr<reboot_end && patches; addr+=4){
+    for (u32 addr = REBOOT_TEXT; addr<reboot_end && patches; addr+=4){
         u32 data = _lw(addr);
         if (data == 0x02A0E821 || data == 0x0280E821){ // found loadcore jump on PSP
             _sw(0x3821 | ((_lw(addr-4) & 0x3E00000) >> 5), addr-4); // ADDU $a3 $zero <reg>
@@ -694,7 +694,7 @@ void setRebootModule(){
 
 void patchRebootIoPSP(){
     int patches = 3;
-    for (u32 addr = reboot_start; addr<reboot_end && patches; addr+=4){
+    for (u32 addr = REBOOT_TEXT; addr<reboot_end && patches; addr+=4){
         u32 data = _lw(addr);
         if (data == 0x8E840000 || data == 0x8EA40000){
 #ifdef MS_IPL

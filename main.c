@@ -71,8 +71,7 @@ int (* UnpackBootConfig)(char * buffer, int length) = NULL;
 extern int UnpackBootConfigPatched(char **p_buffer, int length);
 u32 UnpackBootConfigCall = 0;
 u32 UnpackBootConfigArg = 0;
-u32 reboot_start = 0;
-u32 reboot_end = 0;
+u32 reboot_end = REBOOT_TEXT+0x20000; // 128KB at most
 u32 loadcore_text = 0;
 
 //io flags
@@ -222,12 +221,11 @@ void flushCache(void)
 }
 
 // Common rebootex patches for PSP and Vita
-u32 findRebootFunctions(u32 reboot_start){
+void findRebootFunctions(){
     register void (* Icache)(void) = NULL;
     register void (* Dcache)(void) = NULL;
-    u32 reboot_end = 0;
     // find functions
-    for (u32 addr = reboot_start; ; addr+=4){
+    for (u32 addr = REBOOT_TEXT; addr<reboot_end; addr+=4){
         u32 data = _lw(addr);
         if (data == 0xBD01FFC0){ // sceRebootDacheWritebackInvalidateAll
             u32 a = addr;
@@ -275,7 +273,6 @@ u32 findRebootFunctions(u32 reboot_start){
     sceRebootDacheWritebackInvalidateAll = Dcache;
     Icache();
     Dcache();
-    return reboot_end;
 }
 
 static void checkRebootConfig(){
@@ -314,7 +311,8 @@ int _arkReboot(int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int a
     syscon_ctrl_ms_power(1);
     #endif
 
-    #if defined(PAYLOADEX) && !defined(VITA_PAYLOADEX)
+    #ifdef PAYLOADEX
+    #ifndef VITA_PAYLOADEX
     u32 ctrl = _lw(BOOT_KEY_BUFFER);
 
     if ((ctrl & SYSCON_CTRL_HOME) == 0) {
@@ -324,12 +322,12 @@ int _arkReboot(int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int a
     if ((ctrl & SYSCON_CTRL_RTRG) == 0) {
         _arkconf.recovery = 1;
     }
-
+    #endif
     memcpy(ark_config, &_arkconf, sizeof(ARKConfig));
     #endif
 
-    reboot_start = REBOOT_TEXT;
-    reboot_end = findRebootFunctions(reboot_start); // scan for reboot functions
+    // scan for reboot functions
+    findRebootFunctions();
     
     // patch reboot buffer
     checkRebootConfig();
