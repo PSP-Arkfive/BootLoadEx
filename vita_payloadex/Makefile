@@ -4,7 +4,7 @@ PYTHON = $(shell which python3)
 ARKSDK = $(PSPDEV)/share/ark-dev-sdk
 BOOTLOADEX ?= ..
 
-TARGET = nand_payloadex.bin
+TARGET = vita_payloadex.bin
 
 all: $(TARGET)
 

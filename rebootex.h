@@ -110,10 +110,7 @@ u32 FindImportRange(char *libname, u32 nid, u32 lower, u32 higher);
 
 // Rebootex functions
 u32 loadCoreModuleStartCommon(u32 entry);
-void patchRebootBufferPSP();
-#ifdef REBOOTEX
-void patchRebootBufferVita();
-#endif
+extern void patchRebootBuffer();
 
 // IO functions
 int pspemuLfatOpenExtra(BootFile* file);

@@ -88,8 +88,6 @@ int (* sceBootLfatOpen)(const char * filename) = NULL;
 int (* sceBootLfatRead)(char * buffer, int length) = NULL;
 int (* sceBootLfatClose)(void) = NULL;
 
-// implementation specific patches
-extern void patchRebootBuffer();
 
 // Custom PRX Support
 int ARKPRXDecrypt(PSP_Header* prx, unsigned int size, unsigned int * newsize)
