@@ -83,9 +83,37 @@ int PatchSysMem(void *a0, void *sysmem_config)
     return module_bootstart(4, sysmem_config);
 }
 
+/*
+	0x89FF0000: Apitype
+	0x89FF0004: vsh: 2, update: 3, pops: 4, licence: 5, app: 6, umd: 7, mlnapp: 8
+	0x89FF0008: Path #1
+	0x89FF0048: Path #2
+	0x89FF0088: Path #3
+	0x89FF00C8: SFO buffer
+	0x89FF14C8: 0x000001F4
+	0x89FF14CC: 0x000000DC
+	0x89FF14D0: 0x00060313
+	0x89FF1510: TITLEID
+	0x89FF1520: 0x00000003
+	0x89FF1540: Path #4
+	0x89FF1590: Version
+*/
+#ifdef PAYLOADEX
+int loadParamsPatched(int a0) {
+	int v0 = _lw(a0 + 12);
+	int v1 = _lw(a0 + 16);
+	_sw(_lw(0x89FF0000), (v1 + (v0 << 5)) - 12);
+	return 0;
+}
+#endif
 
 // patch reboot on ps vita
 void patchRebootBuffer(){
+
+    #ifdef PAYLOADEX
+    *(u32 *)0x89FF0000 = 0x200;
+	*(u32 *)0x89FF0004 = 0x2;
+    #endif
 
     // hijack UnpackBootConfig to insert modules at runtime
     _sw(0x27A40004, UnpackBootConfigArg); // addiu $a0, $sp, 4
@@ -110,6 +138,17 @@ void patchRebootBuffer(){
         else if ((data & 0x0000FFFF) == 0x8B00 && redirect_flash){
             _sb(0xA0, addr); // Link Filesystem Buffer to 0x8BA00000
         }
+        #ifdef PAYLOADEX
+        // Find sceBoot
+		else if (data == 0x27BD01C0) {
+			extern void* sceReboot;
+            sceReboot = (void *)(addr + 4);
+		}
+        // Don't load pspemu params
+		else if (data == 0x240500CF) {
+			MAKE_CALL(addr + 4, loadParamsPatched);
+		}
+        #endif
     }
     // Flush Cache
     flushCache();

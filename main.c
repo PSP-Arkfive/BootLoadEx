@@ -239,7 +239,7 @@ u32 findRebootFunctions(u32 reboot_start){
             do {a-=4;} while (_lw(a) != 0x40088000);
             Icache = (void*)a;
         }
-#ifdef REBOOTEX
+        #ifdef REBOOTEX
         else if (data == 0x8FA50008 && _lw(addr+8) == 0x8FA40004){ // UnpackBootConfig
             UnpackBootConfigArg = addr+8;
             u32 a = addr;
@@ -247,7 +247,7 @@ u32 findRebootFunctions(u32 reboot_start){
             UnpackBootConfig = (void*)K_EXTRACT_CALL(a-4);
             UnpackBootConfigCall = a-4;
         }
-#else
+        #else
         else if (data == 0x8FA40004){ // UnpackBootConfig
             if (_lw(addr+8) == 0x8FA50008) {
                 UnpackBootConfigArg = addr;
@@ -260,7 +260,7 @@ u32 findRebootFunctions(u32 reboot_start){
                 UnpackBootConfigCall = addr+8;
             }
         }
-#endif
+        #endif
         else if ((data == _lw(addr+4)) && (data & 0xFC000000) == 0xAC000000){ // Patch ~PSP header check
             // Returns size of the buffer on loading whatever modules
             _sw(0xAFA50000, addr+4); // sw a1, 0(sp)
@@ -304,7 +304,7 @@ int _arkReboot(int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int a
     colorDebug(0xff00);
     #endif
     
-#if defined(REBOOTEX) && defined(MS_IPL)
+    #if defined(REBOOTEX) && defined(MS_IPL)
     // GPIO enable
     REG32(0xbc10007c) |= 0xc8;
     __asm("sync"::);
@@ -312,9 +312,9 @@ int _arkReboot(int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int a
     syscon_init();
     
     syscon_ctrl_ms_power(1);
-#endif
+    #endif
 
-#ifdef PAYLOADEX
+    #if defined(PAYLOADEX) && !defined(VITA_PAYLOADEX)
     u32 ctrl = _lw(BOOT_KEY_BUFFER);
 
     if ((ctrl & SYSCON_CTRL_HOME) == 0) {
@@ -326,7 +326,7 @@ int _arkReboot(int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int a
     }
 
     memcpy(ark_config, &_arkconf, sizeof(ARKConfig));
-#endif
+    #endif
 
     reboot_start = REBOOT_TEXT;
     reboot_end = findRebootFunctions(reboot_start); // scan for reboot functions

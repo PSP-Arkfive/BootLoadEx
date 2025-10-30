@@ -9,7 +9,7 @@ TARGET = vita_payloadex.bin
 all: $(TARGET)
 
 INCDIR = $(PSPSDK)/include $(PSPSDK)/include/iplsdk
-CFLAGS = -std=c99 -Wall -Os -G0 -fno-pic $(addprefix -I, $(INCDIR)) -DPAYLOADEX
+CFLAGS = -std=c99 -Wall -Os -G0 -fno-pic $(addprefix -I, $(INCDIR)) -DPAYLOADEX -DVITA_PAYLOADEX
 
 CC = psp-gcc
 LD = psp-ld
@@ -38,7 +38,7 @@ crt0.o : $(BOOTLOADEX)/crt0.S
 $(REBOOT_OBJS) : %.o : $(BOOTLOADEX)/%.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-patches.o: $(BOOTLOADEX)/psp_rebootex/patches.c
+patches.o: $(BOOTLOADEX)/vita_rebootex/patches.c
 	$(CC) $(CFLAGS) -I$(BOOTLOADEX) -c $< -o $@
 
 main.elf: crt0.o $(REBOOT_OBJS) $(C_OBJS) patches.o
