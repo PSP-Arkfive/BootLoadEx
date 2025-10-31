@@ -3,6 +3,14 @@
 #include "rebootex.h"
 #include "pspbtcnf.h"
 
+// Non-standard strcpy, using the standard version doesn't work for some reason (???)
+int my_strcpy(char* dest, const char* orig){
+    int i = 0;
+    do{
+        dest[i] = orig[i];
+    } while (orig[i++]);
+    return i-1; // TODO: this is NOT standard behavior of strcpy
+}
 
 int SearchPrx(char *buffer, const char *modname)
 {
@@ -105,9 +113,11 @@ int AddPRX(char * buffer, const char * insertbefore, const char * prxname, u32 f
     }
 
     _btcnf_header * header = (_btcnf_header *)buffer;
-    char* len = strcpy(buffer + header->modnameend, prxname); // TODO: is this correct? or maybe strlen(prxname);
-    header->modnameend += (u32)len+1;
-    return AddPRXNoCopyName(buffer, insertbefore, header->modnameend - (u32)len - 1, flags);
+    int prxname_offset = header->modnameend;
+    int namelen = strlen(prxname);
+    int len = my_strcpy(buffer + prxname_offset, prxname);
+    header->modnameend += len+1;
+    return AddPRXNoCopyName(buffer, insertbefore, prxname_offset, flags);
 }
 
 int RemovePrx(char *buffer, const char *prxname, u32 flags)

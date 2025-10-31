@@ -19,14 +19,13 @@ LINKFILE = $(BOOTLOADEX)/linkfile.l
 
 REBOOT_OBJS = \
 	main.o \
-	lib.o \
 	pspbtcnf.o \
 	patches_psp.o
 	
 C_OBJS = \
 	$(BOOTLOADEX)/scanner.o \
 
-LIBS = -L $(ARKSDK)/libs -liplsdk
+LIBS = -L $(PSPSDK)/lib -lansic -liplsdk
 
 ifdef DEBUG
 CFLAGS += -DDEBUG=$(DEBUG)
